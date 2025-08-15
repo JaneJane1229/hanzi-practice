@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Chinese Character Writing Practicing</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; background-color: #f9f9f9; }
+  #character, .practice-box {
+    margin: 10px;
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    border: 1px solid #ccc;
+    background-color: white;
+    vertical-align: top;
+  }
+  .word-list { margin-top: 20px; list-style-type: none; padding: 0; text-align: left; display: inline-block; }
+  .word-list li { margin: 5px 0; }
+  .word-chinese {
+    font-family: "KaiTi", "楷体", serif;
+    font-weight: bold;
+    font-size: 26px;
+    margin-right: 5px;
+  }
+  select, button { padding: 5px; font-size: 16px; margin: 5px; }
+  h3.common-title {
+    display: inline-block;
+    border: 1px solid #ccc;
+    padding: 2px 6px;
+    margin-top: 20px;
+  }
+</style>
+<script src="https://unpkg.com/hanzi-writer/dist/hanzi-writer.min.js"></script>
+</head>
+<body>
+
+<h1>Chinese Character Writing Practicing</h1>
+
+<p>Select the text:</p>
+<select id="lessonSelect"></select>
+<br>
+<p>Select Chinese characters:</p>
+<select id="charSelect"></select>
+<br>
+
+<p><h2 id="charInfo"></h2> <button id="playAudio">🔊 Pronunciation</button></p>
+
+<div id="character"></div>
+<div id="practiceContainer"></div>
+
+<h3 class="common-title">Common words</h3><br>
+<ul id="wordList" class="word-list"></ul>
+
+<script>
+const SHEET_URL = "https://opensheet.vercel.app/1OhIY2yvP9_K4SsIk0yTDi-0-vOof99hoXYclf8lt_CY/工作表1";
+let charData = {};
+let lessons = {};  // 按章节分组汉字
+let lessonOrder = [];
+let currentLesson = "";
+let currentChars = [];
+let currentPracticeText = "";
+let writer;
+
+// 从 Google Sheets 读取数据
+fetch(SHEET_URL)
+  .then(res => res.json())
+  .then(data => {
+    data.forEach(row => {
+      charData[row.character] = {
+        pinyin: row.pinyin,
+        english: row.english,
+        words: [
+          { word: row.word1, pinyin: row.word1_pinyin, english: row.word1_english },
+          { word: row.word2, pinyin: row.word2_pinyin, english: row.word2_english }
+        ],
+        lesson: row.lesson
+      };
+      if (!lessons[row.lesson]) lessons[row.lesson] = [];
+      lessons[row.lesson].push(row.character);
+    });
+    lessonOrder = Object.keys(lessons);
+    initLessonSelect();
+    loadLesson(lessonOrder[0]);
+  });
+
+// 初始化章节选择
+function initLessonSelect() {
+  const select = document.getElementById("lessonSelect");
+  lessonOrder.forEach(lesson => {
+    const opt = document.createElement("option");
+    opt.value = lesson;
+    opt.textContent = lesson;
+    select.appendChild(opt);
+  });
+  select.addEventListener("change", () => loadLesson(select.value));
+}
+
+// 加载章节
+function loadLesson(lesson) {
+  currentLesson = lesson;
+  currentChars = lessons[lesson];
+  initCharSelect();
+  loadCharacter(0); // 默认显示本课第一个汉字
+}
+
+// 初始化本课生字选择
+function initCharSelect() {
+  const select = document.getElementById("charSelect");
+  select.innerHTML = "";
+  currentChars.forEach((char, index) => {
+    const opt = document.createElement("option");
+    opt.value = index;
+    opt.textContent = char;
+    select.appendChild(opt);
+  });
+  select.addEventListener("change", () => {
+    loadCharacter(parseInt(select.value));
+  });
+}
+
+// 加载指定索引的汉字
+function loadCharacter(index) {
+  const char = currentChars[index];
+  const info = charData[char];
+  currentPracticeText = char;
+
+  document.getElementById("charInfo").textContent = `${char} (${info.pinyin}) - ${info.english}`;
+  document.getElementById("charSelect").value = index;
+
+  // 常见词语
+  const wordList = document.getElementById("wordList");
+  wordList.innerHTML = "";
+  info.words.forEach(w => {
+    if (w.word) {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="word-chinese">${w.word}</span> (${w.pinyin}) - ${w.english}`;
+      li.onclick = () => {
+        currentPracticeText = w.word;
+        renderCharacterAndPractice(currentPracticeText);
+      };
+      wordList.appendChild(li);
+    }
+  });
+
+  renderCharacterAndPractice(currentPracticeText);
+}
+
+// 渲染笔顺和 8 个练习框
+function renderCharacterAndPractice(text) {
+  document.getElementById("character").innerHTML = "";
+  writer = HanziWriter.create('character', text, { width: 150, height: 150, padding: 5, showOutline: true });
+  writer.loopCharacterAnimation();
+
+  const container = document.getElementById("practiceContainer");
+  container.innerHTML = "";
+  for (let i = 0; i < 8; i++) {
+    const div = document.createElement("div");
+    div.className = "practice-box";
+    container.appendChild(div);
+    const practiceWriter = HanziWriter.create(div, text, {
+      width: 150,
+      height: 150,
+      padding: 8,
+      showOutline: true,
+      showCharacter: false
+    });
+    practiceWriter.quiz();
+  }
+}
+
+// 发音功能
+document.getElementById("playAudio").addEventListener("click", () => {
+  const utter = new SpeechSynthesisUtterance(currentPracticeText);
+  utter.lang = "zh-CN";
+  speechSynthesis.speak(utter);
+});
+</script>
+
+</body>
+</html>
