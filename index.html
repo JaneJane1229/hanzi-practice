@@ -2,32 +2,75 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chinese Character Writing Practicing</title>
 <style>
-  body { font-family: Arial, sans-serif; text-align: center; background-color: #f9f9f9; }
-  #character, .practice-box {
-    margin: 10px;
-    display: inline-block;
-    width: 150px;
-    height: 150px;
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+  }
+  #character {
+    margin: 10px auto;
+    width: 40vw;
+    height: 40vw;
+    max-width: 200px;
+    max-height: 200px;
     border: 1px solid #ccc;
     background-color: white;
-    vertical-align: top;
   }
-  .word-list { margin-top: 20px; list-style-type: none; padding: 0; text-align: left; display: inline-block; }
-  .word-list li { margin: 5px 0; }
+  .practice-box {
+    width: 40vw;
+    height: 40vw;
+    max-width: 150px;
+    max-height: 150px;
+    border: 1px solid #ccc;
+    background-color: white;
+    margin: 5px;
+  }
+  #practiceContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 100%;
+  }
+  .word-list {
+    margin-top: 20px;
+    list-style-type: none;
+    padding: 0;
+    text-align: left;
+    display: inline-block;
+  }
+  .word-list li {
+    margin: 5px 0;
+    font-size: 4vw;
+  }
   .word-chinese {
     font-family: "KaiTi", "楷体", serif;
     font-weight: bold;
-    font-size: 26px;
+    font-size: 5vw;
     margin-right: 5px;
   }
-  select, button { padding: 5px; font-size: 16px; margin: 5px; }
+  select, button {
+    padding: 5px;
+    font-size: 4vw;
+    margin: 5px;
+  }
   h3.common-title {
     display: inline-block;
     border: 1px solid #ccc;
     padding: 2px 6px;
     margin-top: 20px;
+    font-size: 4vw;
+  }
+  h1 {
+    font-size: 5vw;
+    margin-top: 10px;
+  }
+  h2 {
+    font-size: 5vw;
   }
 </style>
 <script src="https://unpkg.com/hanzi-writer/dist/hanzi-writer.min.js"></script>
@@ -43,7 +86,8 @@
 <select id="charSelect"></select>
 <br>
 
-<p><h2 id="charInfo"></h2> <button id="playAudio">🔊 Pronunciation</button></p>
+<h2 id="charInfo"></h2>
+<button id="playAudio">🔊 Pronunciation</button>
 
 <div id="character"></div>
 <div id="practiceContainer"></div>
@@ -54,14 +98,13 @@
 <script>
 const SHEET_URL = "https://opensheet.vercel.app/1OhIY2yvP9_K4SsIk0yTDi-0-vOof99hoXYclf8lt_CY/工作表1";
 let charData = {};
-let lessons = {};  // 按章节分组汉字
+let lessons = {};
 let lessonOrder = [];
 let currentLesson = "";
 let currentChars = [];
 let currentPracticeText = "";
 let writer;
 
-// 从 Google Sheets 读取数据
 fetch(SHEET_URL)
   .then(res => res.json())
   .then(data => {
@@ -83,7 +126,6 @@ fetch(SHEET_URL)
     loadLesson(lessonOrder[0]);
   });
 
-// 初始化章节选择
 function initLessonSelect() {
   const select = document.getElementById("lessonSelect");
   lessonOrder.forEach(lesson => {
@@ -95,15 +137,13 @@ function initLessonSelect() {
   select.addEventListener("change", () => loadLesson(select.value));
 }
 
-// 加载章节
 function loadLesson(lesson) {
   currentLesson = lesson;
   currentChars = lessons[lesson];
   initCharSelect();
-  loadCharacter(0); // 默认显示本课第一个汉字
+  loadCharacter(0);
 }
 
-// 初始化本课生字选择
 function initCharSelect() {
   const select = document.getElementById("charSelect");
   select.innerHTML = "";
@@ -118,7 +158,6 @@ function initCharSelect() {
   });
 }
 
-// 加载指定索引的汉字
 function loadCharacter(index) {
   const char = currentChars[index];
   const info = charData[char];
@@ -127,7 +166,6 @@ function loadCharacter(index) {
   document.getElementById("charInfo").textContent = `${char} (${info.pinyin}) - ${info.english}`;
   document.getElementById("charSelect").value = index;
 
-  // 常见词语
   const wordList = document.getElementById("wordList");
   wordList.innerHTML = "";
   info.words.forEach(w => {
@@ -145,21 +183,21 @@ function loadCharacter(index) {
   renderCharacterAndPractice(currentPracticeText);
 }
 
-// 渲染笔顺和 8 个练习框
 function renderCharacterAndPractice(text) {
   document.getElementById("character").innerHTML = "";
-  writer = HanziWriter.create('character', text, { width: 150, height: 150, padding: 5, showOutline: true });
+  const size = Math.min(window.innerWidth * 0.4, 150);
+  writer = HanziWriter.create('character', text, { width: size, height: size, padding: 5, showOutline: true });
   writer.loopCharacterAnimation();
 
   const container = document.getElementById("practiceContainer");
   container.innerHTML = "";
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 6; i++) { // 改成 6 个格子
     const div = document.createElement("div");
     div.className = "practice-box";
     container.appendChild(div);
     const practiceWriter = HanziWriter.create(div, text, {
-      width: 150,
-      height: 150,
+      width: size,
+      height: size,
       padding: 8,
       showOutline: true,
       showCharacter: false
@@ -168,7 +206,6 @@ function renderCharacterAndPractice(text) {
   }
 }
 
-// 发音功能
 document.getElementById("playAudio").addEventListener("click", () => {
   const utter = new SpeechSynthesisUtterance(currentPracticeText);
   utter.lang = "zh-CN";
