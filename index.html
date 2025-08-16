@@ -16,8 +16,8 @@
     margin: 10px auto;
     width: 40vw;
     height: 40vw;
-    max-width: 200px;
-    max-height: 200px;
+    max-width: 150px;
+    max-height: 150px;
     border: 1px solid #ccc;
     background-color: white;
   }
@@ -32,7 +32,7 @@
   }
   #practiceContainer {
     display: flex;
-   flex-direction: column; /* 改为垂直排列 */
+    flex-direction: column; /* 改为垂直排列 */
     align-items: center;    /* 居中 */
     max-width: 100%;
   }
@@ -44,14 +44,14 @@
     display: inline-block;
   }
   .word-list li {
-    margin: 5px 0;
+    margin: 4px 0;
     font-size: 4vw;
   }
   .word-chinese {
     font-family: "KaiTi", "楷体", serif;
     font-weight: bold;
-    font-size: 7vw;
-    margin-right: 7px;
+    font-size: 6vw;
+    margin-right: 6px;
   }
   select, button {
     padding: 5px;
@@ -65,12 +65,20 @@
     margin-top: 20px;
     font-size: 4vw;
   }
-  h1 {
-    font-size: 5vw;
-    margin-top: 10px;
+  /* 汉字和按钮在同一行 */
+  #charAudioContainer {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
   }
-  h2 {
+  #charAudioContainer h2 {
+    font-size: 7vw;
+    margin: 0;
+  }
+  #charAudioContainer button {
     font-size: 5vw;
+    padding: 5px 10px;
   }
 </style>
 <script src="https://unpkg.com/hanzi-writer/dist/hanzi-writer.min.js"></script>
@@ -86,8 +94,11 @@
 <select id="charSelect"></select>
 <br>
 
-<h2 id="charInfo"></h2>
-<button id="playAudio">🔊</button>
+<!-- 修改后的汉字+播放按钮容器 -->
+<div id="charAudioContainer">
+  <h2 id="charInfo"></h2>
+  <button id="playAudio">🔊</button>
+</div>
 <br>
 <h3 class="common-title">Common words</h3><br>
 <ul id="wordList" class="word-list"></ul>
@@ -191,7 +202,7 @@ function renderCharacterAndPractice(text) {
 
   const container = document.getElementById("practiceContainer");
   container.innerHTML = "";
-  for (let i = 0; i < 4; i++) { // 改成 4 个格子
+  for (let i = 0; i < 4; i++) { // 4 个格子
     const div = document.createElement("div");
     div.className = "practice-box";
     container.appendChild(div);
