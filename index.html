@@ -32,8 +32,8 @@
   }
   #practiceContainer {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+   flex-direction: column; /* 改为垂直排列 */
+    align-items: center;    /* 居中 */
     max-width: 100%;
   }
   .word-list {
@@ -50,8 +50,8 @@
   .word-chinese {
     font-family: "KaiTi", "楷体", serif;
     font-weight: bold;
-    font-size: 5vw;
-    margin-right: 5px;
+    font-size: 7vw;
+    margin-right: 7px;
   }
   select, button {
     padding: 5px;
@@ -87,13 +87,13 @@
 <br>
 
 <h2 id="charInfo"></h2>
-<button id="playAudio">🔊 Pronunciation</button>
+<button id="playAudio">🔊</button>
+<br>
+<h3 class="common-title">Common words</h3><br>
+<ul id="wordList" class="word-list"></ul>
 
 <div id="character"></div>
 <div id="practiceContainer"></div>
-
-<h3 class="common-title">Common words</h3><br>
-<ul id="wordList" class="word-list"></ul>
 
 <script>
 const SHEET_URL = "https://opensheet.vercel.app/1OhIY2yvP9_K4SsIk0yTDi-0-vOof99hoXYclf8lt_CY/工作表1";
