@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
@@ -46,6 +46,9 @@
   .word-list li {
     margin: 4px 0;
     font-size: 4vw;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
   .word-chinese {
     font-family: "KaiTi", "楷体", serif;
@@ -87,10 +90,10 @@
 
 <h1>Chinese Character Writing Practicing</h1>
 
-<p>Select the text:</p>
+<p>select a category:</p>
 <select id="lessonSelect"></select>
 <br>
-<p>Select Chinese character:</p>
+<p>Select a Chinese character:</p>
 <select id="charSelect"></select>
 <br>
 
@@ -100,12 +103,14 @@
   <button id="playAudio">🔊</button>
 </div>
 <br>
-<ul id="wordList" class="word-list"></ul><br>
-
-
+<div id="wordList" class="word-list"></div><br>
+<p style="font-size:12px;">&nbsp;&nbsp;&nbsp;&nbsp;*The pronunciation of the words on this page is for reference only. It is recommended that you go to more professional websites or learn the pronunciation from your Chinese teacher.&nbsp;&nbsp;&nbsp;&nbsp;</p>
 <div id="character"></div>
-<div id="practiceContainer"></div>
+<p>Have a practice：✍️</p>
 
+<div id="practiceContainer"></div>
+<br>
+<br>
 <script>
 const SHEET_URL = "https://opensheet.vercel.app/1OhIY2yvP9_K4SsIk0yTDi-0-vOof99hoXYclf8lt_CY/工作表1";
 let charData = {};
@@ -183,10 +188,18 @@ function loadCharacter(index) {
     if (w.word) {
       const li = document.createElement("li");
       li.innerHTML = `<span class="word-chinese">${w.word}</span> (${w.pinyin}) - ${w.english}`;
-      li.onclick = () => {
-        currentPracticeText = w.word;
-        renderCharacterAndPractice(currentPracticeText);
-      };
+      
+      // 创建播放按钮
+      const playBtn = document.createElement("button");
+      playBtn.textContent = "🔊";
+      playBtn.style.fontSize = "4vw";
+      playBtn.addEventListener("click", () => {
+        const utter = new SpeechSynthesisUtterance(w.word);
+        utter.lang = "zh-CN";
+        speechSynthesis.speak(utter);
+      });
+      
+      li.appendChild(playBtn);
       wordList.appendChild(li);
     }
   });
