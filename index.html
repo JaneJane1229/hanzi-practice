@@ -16,16 +16,16 @@
     margin: 10px auto;
     width: 40vw;
     height: 40vw;
-    max-width: 150px;
-    max-height: 150px;
+    max-width: 180px;
+    max-height: 180px;
     border: 1px solid #ccc;
     background-color: white;
   }
   .practice-box {
     width: 40vw;
     height: 40vw;
-    max-width: 150px;
-    max-height: 150px;
+    max-width: 180px;
+    max-height: 180px;
     border: 1px solid #ccc;
     background-color: white;
     margin: 5px;
@@ -214,7 +214,7 @@ function loadCharacter(index) {
 // 渲染汉字和练习区
 function renderCharacterAndPractice(text) {
   document.getElementById("character").innerHTML = "";
-  const size = Math.min(window.innerWidth * 0.4, 150);
+  const size = Math.min(window.innerWidth * 0.4, 180);
   writer = HanziWriter.create('character', text, { width: size, height: size, padding: 5, showOutline: true });
   writer.loopCharacterAnimation();
 
