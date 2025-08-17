@@ -32,8 +32,8 @@
   }
   #practiceContainer {
     display: flex;
-    flex-direction: column; /* 改为垂直排列 */
-    align-items: center;    /* 居中 */
+    flex-direction: column;
+    align-items: center;
     max-width: 100%;
   }
   .word-list {
@@ -68,7 +68,6 @@
     margin-top: 10px;
     font-size: 4vw;
   }
-  /* 汉字和按钮在同一行 */
   #charAudioContainer {
     display: inline-flex;
     align-items: center;
@@ -97,7 +96,6 @@
 <select id="charSelect"></select>
 <br>
 
-<!-- 修改后的汉字+播放按钮容器 -->
 <div id="charAudioContainer">
   <h2 id="charInfo"></h2>
   <button id="playAudio">🔊</button>
@@ -112,42 +110,42 @@
 <p>Have a practice：✍️</p>
 <div id="practiceContainer"></div>
 
-<br>
-<br>
+<br><br>
 
 <script>
 const SHEET_URL = "https://opensheet.vercel.app/1OhIY2yvP9_K4SsIk0yTDi-0-vOof99hoXYclf8lt_CY/工作表1";
-let charData = {};
-let lessons = {};
+
+let charData = {};   // 按 Lesson 存储: charData[lesson] = { character: {pinyin, english, words} }
 let lessonOrder = [];
 let currentLesson = "";
 let currentChars = [];
-let currentPracticeText = "";
+let currentChar = "";
 let writer;
 
+// 加载数据
 fetch(SHEET_URL)
   .then(res => res.json())
   .then(data => {
     data.forEach(row => {
-      charData[row.character] = {
+      if (!charData[row.lesson]) charData[row.lesson] = {};
+      charData[row.lesson][row.character] = {
         pinyin: row.pinyin,
         english: row.english,
         words: [
           { word: row.word1, pinyin: row.word1_pinyin, english: row.word1_english },
           { word: row.word2, pinyin: row.word2_pinyin, english: row.word2_english }
-        ],
-        lesson: row.lesson
+        ]
       };
-      if (!lessons[row.lesson]) lessons[row.lesson] = [];
-      lessons[row.lesson].push(row.character);
     });
-    lessonOrder = Object.keys(lessons);
+    lessonOrder = Object.keys(charData);
     initLessonSelect();
     loadLesson(lessonOrder[0]);
   });
 
+// 初始化 Lesson 下拉
 function initLessonSelect() {
   const select = document.getElementById("lessonSelect");
+  select.innerHTML = "";
   lessonOrder.forEach(lesson => {
     const opt = document.createElement("option");
     opt.value = lesson;
@@ -157,13 +155,15 @@ function initLessonSelect() {
   select.addEventListener("change", () => loadLesson(select.value));
 }
 
+// 加载指定 Lesson
 function loadLesson(lesson) {
   currentLesson = lesson;
-  currentChars = lessons[lesson];
+  currentChars = Object.keys(charData[lesson]);
   initCharSelect();
   loadCharacter(0);
 }
 
+// 初始化 Character 下拉
 function initCharSelect() {
   const select = document.getElementById("charSelect");
   select.innerHTML = "";
@@ -178,22 +178,22 @@ function initCharSelect() {
   });
 }
 
+// 加载指定汉字
 function loadCharacter(index) {
-  const char = currentChars[index];
-  const info = charData[char];
-  currentPracticeText = char;
+  currentChar = currentChars[index];
+  const info = charData[currentLesson][currentChar];
 
-  document.getElementById("charInfo").textContent = `${char} (${info.pinyin}) - ${info.english}`;
+  document.getElementById("charInfo").textContent = `${currentChar} (${info.pinyin}) - ${info.english}`;
   document.getElementById("charSelect").value = index;
 
+  // 显示词列表
   const wordList = document.getElementById("wordList");
   wordList.innerHTML = "";
   info.words.forEach(w => {
     if (w.word) {
       const li = document.createElement("li");
       li.innerHTML = `<span class="word-chinese">${w.word}</span> (${w.pinyin}) - ${w.english}`;
-      
-      // 创建播放按钮
+
       const playBtn = document.createElement("button");
       playBtn.textContent = "🔊";
       playBtn.style.fontSize = "4vw";
@@ -202,15 +202,16 @@ function loadCharacter(index) {
         utter.lang = "zh-CN";
         speechSynthesis.speak(utter);
       });
-      
+
       li.appendChild(playBtn);
       wordList.appendChild(li);
     }
   });
 
-  renderCharacterAndPractice(currentPracticeText);
+  renderCharacterAndPractice(currentChar);
 }
 
+// 渲染汉字和练习区
 function renderCharacterAndPractice(text) {
   document.getElementById("character").innerHTML = "";
   const size = Math.min(window.innerWidth * 0.4, 150);
@@ -219,7 +220,7 @@ function renderCharacterAndPractice(text) {
 
   const container = document.getElementById("practiceContainer");
   container.innerHTML = "";
-  for (let i = 0; i < 8; i++) { // 8 个格子
+  for (let i = 0; i < 8; i++) {
     const div = document.createElement("div");
     div.className = "practice-box";
     container.appendChild(div);
@@ -234,8 +235,9 @@ function renderCharacterAndPractice(text) {
   }
 }
 
+// 播放当前汉字声音
 document.getElementById("playAudio").addEventListener("click", () => {
-  const utter = new SpeechSynthesisUtterance(currentPracticeText);
+  const utter = new SpeechSynthesisUtterance(currentChar);
   utter.lang = "zh-CN";
   speechSynthesis.speak(utter);
 });
