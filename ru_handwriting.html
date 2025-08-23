@@ -22,7 +22,7 @@
     }
     #practiceContainer {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 20px;
       margin-top: 20px;
     }
@@ -30,6 +30,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+    .canvas-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
     }
     canvas {
       border: 1px dashed #aaa;
@@ -68,31 +73,55 @@
       const box = document.createElement("div");
       box.className = "practice-box";
 
-      const canvas = document.createElement("canvas");
-      canvas.width = 150;
-      canvas.height = 150;
+      // 大写 + 小写 canvas
+      const row = document.createElement("div");
+      row.className = "canvas-row";
 
-      drawLetter(canvas, letter);
+      const upperCanvas = createCanvas(letter);
+      const lowerCanvas = createCanvas(letter.toLowerCase());
 
+      row.appendChild(upperCanvas.canvas);
+      row.appendChild(lowerCanvas.canvas);
+
+      box.appendChild(row);
+
+      // 清除按钮
       const clearBtn = document.createElement("button");
       clearBtn.textContent = "清除";
       clearBtn.onclick = () => {
-        drawLetter(canvas, letter);
+        upperCanvas.draw();
+        lowerCanvas.draw();
       };
-
-      box.appendChild(canvas);
       box.appendChild(clearBtn);
-      container.appendChild(box);
 
-      enableDrawing(canvas);
+      // 发音按钮
+      const audioBtn = document.createElement("button");
+      audioBtn.textContent = "🔊 发音";
+      audioBtn.onclick = () => {
+        speakLetter(letter);
+      };
+      box.appendChild(audioBtn);
+
+      container.appendChild(box);
     });
 
-    // 绘制花体字母
+    // 创建画布
+    function createCanvas(letter) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 100;
+      canvas.height = 120;
+      const draw = () => drawLetter(canvas, letter);
+      draw();
+      enableDrawing(canvas);
+      return { canvas, draw };
+    }
+
+    // 绘制字母
     function drawLetter(canvas, letter) {
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 背景辅助横线
+      // 背景横线
       ctx.strokeStyle = "#ddd";
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -101,14 +130,14 @@
       ctx.stroke();
 
       // 灰色花体字母
-      ctx.font = "80px 'Marck Script', cursive";
+      ctx.font = "70px 'Marck Script', cursive";
       ctx.fillStyle = "rgba(0,0,0,0.2)";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(letter, canvas.width/2, canvas.height/2);
     }
 
-    // 开启自由描写功能
+    // 描红功能
     function enableDrawing(canvas) {
       const ctx = canvas.getContext("2d");
       let drawing = false;
@@ -149,6 +178,13 @@
         e.preventDefault();
       });
       canvas.addEventListener("touchend", stop);
+    }
+
+    // 发音功能（调用浏览器TTS）
+    function speakLetter(letter) {
+      const utter = new SpeechSynthesisUtterance(letter);
+      utter.lang = "ru-RU"; // 俄语发音
+      speechSynthesis.speak(utter);
     }
   </script>
 </body>
